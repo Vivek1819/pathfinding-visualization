@@ -13,7 +13,7 @@ const Pathfinding = ({ algorithm, grid, setGrid, start, end, setStart, setEnd })
     try {
       const scene = new THREE.Scene();
       sceneRef.current = scene;
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
       renderer = new THREE.WebGLRenderer();
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setClearColor(0xffffff); 
@@ -37,6 +37,13 @@ const Pathfinding = ({ algorithm, grid, setGrid, start, end, setStart, setEnd })
         }
       };
 
+      const onWindowResize = () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      };
+
+      window.addEventListener('resize', onWindowResize);
       window.addEventListener('click', handleMouseClick);
 
       visualizeGrid(scene, grid, start, end);
@@ -52,14 +59,6 @@ const Pathfinding = ({ algorithm, grid, setGrid, start, end, setStart, setEnd })
       };
 
       animate();
-
-      window.addEventListener('resize', onWindowResize, false);
-
-      function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      }
 
       return () => {
         window.removeEventListener('resize', onWindowResize);
@@ -209,7 +208,7 @@ const Pathfinding = ({ algorithm, grid, setGrid, start, end, setStart, setEnd })
       });
 
       visualizeGrid(scene, grid, start, end, closedSet, openSet);
-      await new Promise((resolve) => setTimeout(resolve, 5)); // Faster traversal
+      await new Promise((resolve) => setTimeout(resolve, 1)); // Faster traversal
     }
   };
 
@@ -273,7 +272,7 @@ const Pathfinding = ({ algorithm, grid, setGrid, start, end, setStart, setEnd })
       });
 
       visualizeGrid(scene, grid, start, end, closedSet, openSet);
-      await new Promise((resolve) => setTimeout(resolve, 5)); // Faster traversal
+      await new Promise((resolve) => setTimeout(resolve, 1)); // Faster traversal
     }
   };
 
@@ -292,7 +291,7 @@ const Pathfinding = ({ algorithm, grid, setGrid, start, end, setStart, setEnd })
           path.push(temp);
           temp = temp.previous;
         }
-        path.push(start);
+        path.push(start); 
         visualizePath(scene, path.reverse());
         return;
       }
@@ -314,7 +313,7 @@ const Pathfinding = ({ algorithm, grid, setGrid, start, end, setStart, setEnd })
       });
 
       visualizeGrid(scene, grid, start, end, closedSet, queue);
-      await new Promise((resolve) => setTimeout(resolve, 5)); // Faster traversal
+      await new Promise((resolve) => setTimeout(resolve, 1)); // Faster traversal
     }
   };
 
@@ -355,7 +354,7 @@ const Pathfinding = ({ algorithm, grid, setGrid, start, end, setStart, setEnd })
       });
 
       visualizeGrid(scene, grid, start, end, closedSet, stack);
-      await new Promise((resolve) => setTimeout(resolve, 5)); // Faster traversal
+      await new Promise((resolve) => setTimeout(resolve, 1)); // Faster traversal
     }
   };
 
