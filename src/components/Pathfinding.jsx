@@ -1,39 +1,39 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
-const Pathfinding = ({ algorithm }) => {
+const Pathfinding = ({ algorithm, grid, setGrid }) => {
   const mountRef = useRef(null);
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const sceneRef = useRef(null);
 
   useEffect(() => {
     const scene = new THREE.Scene();
+    sceneRef.current = scene;
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0xffffff); 
     mountRef.current.appendChild(renderer.domElement);
 
-    const grid = createGrid(50, 50); 
-    const start = grid[0][0];
-    const end = grid[49][49];
+    const handleMouseClick = (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(scene.children);
+      if (intersects.length > 0) {
+        const intersectedObject = intersects[0].object;
+        if (intersectedObject.userData.node) {
+          handleCubeClick(intersectedObject.userData.node);
+        }
+      }
+    };
+
+    window.addEventListener('click', handleMouseClick);
 
     visualizeGrid(scene, grid);
-    switch (algorithm) {
-      case 'A*':
-        dynamicAStar(scene, grid, start, end);
-        break;
-      case 'Dijkstra':
-        dynamicDijkstra(scene, grid, start, end);
-        break;
-      case 'BFS':
-        dynamicBFS(scene, grid, start, end);
-        break;
-      case 'DFS':
-        dynamicDFS(scene, grid, start, end);
-        break;
-      default:
-        dynamicAStar(scene, grid, start, end);
-    }
 
+    
     const gridCenterX = (grid.length - 1) * 1.5 / 2;
     const gridCenterY = (grid[0].length - 1) * 1.5 / 2;
     camera.position.set(gridCenterX, gridCenterY, 75); 
@@ -56,40 +56,71 @@ const Pathfinding = ({ algorithm }) => {
 
     return () => {
       window.removeEventListener('resize', onWindowResize);
+      window.removeEventListener('click', handleMouseClick);
       mountRef.current.removeChild(renderer.domElement);
     };
+  }, [grid]);
+
+  useEffect(() => {
+    if (sceneRef.current) {
+      runAlgorithm(sceneRef.current, grid, algorithm);
+    }
   }, [algorithm]);
 
-  const createGrid = (rows, cols) => {
-    const grid = [];
-    for (let i = 0; i < rows; i++) {
-      const row = [];
-      for (let j = 0; j < cols; j++) {
-        row.push({
-          x: i,
-          y: j,
-          f: 0,
-          g: 0,
-          h: 0,
-          neighbors: [],
-          previous: undefined,
-          wall: Math.random() < 0.3 ? true : false,
-          cube: null,
-        });
+  const handleCubeClick = (node) => {
+    const newGrid = grid.map(row => row.map(cell => {
+      if (cell.x === node.x && cell.y === node.y) {
+        return { ...cell, wall: !cell.wall };
       }
-      grid.push(row);
+      return cell;
+    }));
+    setGrid(newGrid);
+  };
+
+  const runAlgorithm = (scene, grid, algorithm) => {
+    switch (algorithm) {
+      case 'A*':
+        dynamicAStar(scene, grid, grid[0][0], grid[grid.length - 1][grid[0].length - 1]);
+        break;
+      case 'Dijkstra':
+        dynamicDijkstra(scene, grid, grid[0][0], grid[grid.length - 1][grid[0].length - 1]);
+        break;
+      case 'BFS':
+        dynamicBFS(scene, grid, grid[0][0], grid[grid.length - 1][grid[0].length - 1]);
+        break;
+      case 'DFS':
+        dynamicDFS(scene, grid, grid[0][0], grid[grid.length - 1][grid[0].length - 1]);
+        break;
+      default:
+        dynamicAStar(scene, grid, grid[0][0], grid[grid.length - 1][grid[0].length - 1]);
+    }
+  };
+
+  const visualizeGrid = (scene, grid, closedSet = [], openSet = []) => {
+    for (let i = 0; i < grid.length; i++) {
+      for (let j = 0; j < grid[i].length; j++) {
+        const node = grid[i][j];
+        if (!node.cube) {
+          const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+          const material = new THREE.MeshBasicMaterial({ color: node.wall ? 0x000000 : 0xffffff });
+          const cube = new THREE.Mesh(geometry, material);
+          cube.position.set(node.x * 1.5, node.y * 1.5, 0); 
+          cube.userData = { node };
+          scene.add(cube);
+          node.cube = cube;
+        } else {
+          node.cube.material.color.set(node.wall ? 0x000000 : 0xffffff);
+        }
+      }
     }
 
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        if (i > 0) grid[i][j].neighbors.push(grid[i - 1][j]);
-        if (i < rows - 1) grid[i][j].neighbors.push(grid[i + 1][j]);
-        if (j > 0) grid[i][j].neighbors.push(grid[i][j - 1]);
-        if (j < cols - 1) grid[i][j].neighbors.push(grid[i][j + 1]);
-      }
-    }
+    closedSet.forEach(node => {
+      node.cube.material.color.set(0x0000ff); 
+    });
 
-    return grid;
+    openSet.forEach(node => {
+      node.cube.material.color.set(0xff0000);
+    });
   };
 
   const dynamicAStar = async (scene, grid, start, end) => {
@@ -150,7 +181,7 @@ const Pathfinding = ({ algorithm }) => {
       }
 
       visualizeGrid(scene, grid, closedSet, openSet);
-      await new Promise((resolve) => setTimeout(resolve, 50)); 
+      await new Promise((resolve) => setTimeout(resolve, 20)); 
     }
   };
 
@@ -210,7 +241,7 @@ const Pathfinding = ({ algorithm }) => {
       }
 
       visualizeGrid(scene, grid, closedSet, openSet);
-      await new Promise((resolve) => setTimeout(resolve, 50)); 
+      await new Promise((resolve) => setTimeout(resolve, 20)); 
     }
   };
 
@@ -229,7 +260,7 @@ const Pathfinding = ({ algorithm }) => {
           path.push(temp);
           temp = temp.previous;
         }
-        path.push(start); 
+        path.push(start);
         visualizePath(scene, path.reverse());
         return;
       }
@@ -247,7 +278,7 @@ const Pathfinding = ({ algorithm }) => {
       }
 
       visualizeGrid(scene, grid, closedSet, queue);
-      await new Promise((resolve) => setTimeout(resolve, 50)); 
+      await new Promise((resolve) => setTimeout(resolve, 20)); 
     }
   };
 
@@ -284,38 +315,12 @@ const Pathfinding = ({ algorithm }) => {
       }
 
       visualizeGrid(scene, grid, closedSet, stack);
-      await new Promise((resolve) => setTimeout(resolve, 50)); 
+      await new Promise((resolve) => setTimeout(resolve, 20)); 
     }
   };
 
   const heuristic = (a, b) => {
     return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-  };
-
-  const visualizeGrid = (scene, grid, closedSet = [], openSet = []) => {
-    for (let i = 0; i < grid.length; i++) {
-      for (let j = 0; j < grid[i].length; j++) {
-        const node = grid[i][j];
-        if (!node.cube) {
-          const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5); 
-          const material = new THREE.MeshBasicMaterial({ color: node.wall ? 0x000000 : 0xffffff });
-          const cube = new THREE.Mesh(geometry, material);
-          cube.position.set(node.x * 1.5, node.y * 1.5, 0); 
-          scene.add(cube);
-          node.cube = cube;
-        } else {
-          node.cube.material.color.set(node.wall ? 0x000000 : 0xffffff);
-        }
-      }
-    }
-
-    closedSet.forEach(node => {
-      node.cube.material.color.set(0x0000ff); 
-    });
-
-    openSet.forEach(node => {
-      node.cube.material.color.set(0xff0000); 
-    });
   };
 
   const visualizePath = (scene, path) => {
