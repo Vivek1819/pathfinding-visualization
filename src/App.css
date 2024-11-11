@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* App.css */
+.grid-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .grid-row {
+    display: flex;
+  }
+  
+  .grid-node {
+    width: 20px;
+    height: 20px;
+    border: 1px solid black;
+    transition: background-color 0.3s;
+  }
