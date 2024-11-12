@@ -42,3 +42,18 @@ button {
   font-size: 16px;
   cursor: pointer;
 }
+
+.glow-button {
+  background-color: black;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-shadow: 0 0 2px #fff, 0 0 2px #fff;
+}
+
+.glow-button:hover {
+  background-color: #333;
+}

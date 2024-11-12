@@ -107,8 +107,8 @@ export default class PathfindingVisualizer extends Component {
     return (
       <div>
         <div className="controls">
-          <button onClick={() => this.visualizeDijkstra()}>Visualize Dijkstra's Algorithm</button>
-          <button onClick={() => this.resetGrid()}>Reset Grid</button>
+          <button onClick={() => this.visualizeDijkstra()} className='glow-button'>Run Dijkstra</button>
+          <button onClick={() => this.resetGrid()} className='glow-button'>Reset</button>
         </div>
         <div className="grid">
           {grid.map((row, rowIdx) => {
