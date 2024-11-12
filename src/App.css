@@ -1,66 +1,22 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* App.css */
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
+.App {
+  text-align: center;
 }
 
-.grid-container {
+.App-logo {
+  height: 40vmin;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  overflow: hidden;
-  margin-top: -100px;
+  font-size: calc(10px + 2vmin);
+  color: white;
 }
 
-.grid-row {
-  display: flex;
-}
-
-.grid-node {
-  width: 15px; /* Adjusted size to fit the grid on the screen */
-  height: 15px; /* Adjusted size to fit the grid on the screen */
-  border: 1px solid black;
-  transition: background-color 0.3s;
-}
-
-.grid-node.wall {
-  background-color: black;
-}
-
-.grid-node.path {
-  background-color: limegreen;
-}
-
-.grid-node.start {
-  background-color: green;
-}
-
-.grid-node.end {
-  background-color: red;
-}
-
-.buttons-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-button {
-  font-weight: 600;
-  padding: 10px 20px;
-  border-radius: 8px;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: #ddd;
+.App-link {
+  color: #09d3ac;
 }
