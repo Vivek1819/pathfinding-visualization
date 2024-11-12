@@ -4,15 +4,15 @@ import Pathfinding from './components/Pathfinding.jsx';
 
 function App() {
   const [algorithm, setAlgorithm] = useState('A*');
-  const [grid, setGrid] = useState(createGrid(200, 60)); // Adjusted grid size
+  const [grid, setGrid] = useState(createGrid(200, 70)); 
   const [start, setStart] = useState({ x: 0, y: 0 });
-  const [end, setEnd] = useState({ x: 29, y: 29 });
+  const [end, setEnd] = useState({ x: 49, y: 49 });
 
   const buttonClass = (algo) => 
     `font-semibold px-4 py-2 rounded-lg transition-colors duration-300 ${algorithm === algo ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black hover:bg-gray-300'}`;
 
   const handleGenerateGrid = () => {
-    setGrid(createGrid(200, 60)); // Adjusted grid size
+    setGrid(createGrid(200, 70));
   };
 
   const handleSetStart = (x, y) => {
@@ -33,7 +33,7 @@ function App() {
         <button onClick={() => setAlgorithm('DFS')} className={buttonClass('DFS')}>DFS</button>
         <button onClick={handleGenerateGrid} className="font-semibold px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600">Generate Grid</button>
       </div>
-      <div className="grid-container">
+      <div className="grid-container" style={{zIndex: -1}}>
         <Pathfinding 
           algorithm={algorithm} 
           grid={grid} 
